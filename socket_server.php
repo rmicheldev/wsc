@@ -126,7 +126,7 @@ function checkHandshake(&$clientItem){
 				$clientItem["handshake"] = true;
 				$id = $clientItem['id'];
 				newMessage('server', $id, "Welcome, your current ID is: {$id}");
-				newMessage('server', 'all', "new user in the room: {$id}");
+				newMessage('server', 'all', "New user in the room: {$id}");
 			}
 		}
 	} 	
