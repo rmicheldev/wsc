@@ -49,6 +49,8 @@ function send() {
     }
     txt.value = "";
     txt.focus();
+
+    console.log($("select_user"));
     try {
         var msgObj  = {};
         msgObj.type = "forall";
@@ -112,10 +114,9 @@ function checkUserExist(newUserID) {
 function tableListUpdate(element, index, array) {
 
 
-    $t = '<div class="input-group"  style="border:solid 1px gray; margin-top:4px" ><div class="input-group-prepend"><div class="input-group-text"><input type = "checkbox"></div></div> <div style="align-self: center;text-align: center;padding-left:12px">' +
+    $t = '<div class="input-group" style="border:solid 1px gray; margin-top:4px" ><div class="input-group-prepend"><div class="input-group-text"><input type="radio" name="select_user"></div></div> <div style="align-self: center;text-align: center;padding-left:12px">' +
         element[0] + " : " + element[1]
         + '</div> </div>';
-
                 
     let newUser = $($t);
     // let newUser = $('<div> <input type="radio" name="favorite_pet" value="Cats" checked>'+'<li class="list-group-item">Cras justo odio</li></div>');
@@ -125,10 +126,6 @@ function tableListUpdate(element, index, array) {
 
 function updateUserList() {
     $("#users").empty();
-    
-    // <input type = "radio" name = "favorite_pet" value = "Cats" checked >
-    // <input type = "radio" name = "favorite_pet" value = "Dogs" > Dogs
-       
     listUsers.forEach(tableListUpdate);
 }
 
