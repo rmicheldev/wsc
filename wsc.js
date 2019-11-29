@@ -15,7 +15,7 @@ function init() {
             try {
                 let jMessage = JSON.parse(msg.data);
                 let message  = jMessage['message'];
-                let source = jMessage['source'];
+                let source   = jMessage['source'];
                 
                 console.log(msg.data);
 
@@ -67,31 +67,68 @@ function send() {
 
 function checkIDAttr(message) {
     var regexp = /(?:^|\s)Welcome, your current ID is:\s(\d+)/g;
-    let myID = parseInt(regexp.exec(message)[1]);
-    if (myID) {
-        $("#myid").text("[identificador: " + myID + "]");
-        listUsers.push(['my', myID]);
-        return true;
+    let rg = regexp.exec(message);
+    if (rg) {
+        let myID = rg[1];
+         if (!checkUserExist(myID)) {
+            $("#myid").text("[identificador: " + myID + "]");
+            listUsers.push(['me', parseInt(myID)]);
+            return true;
+        }
     }
     return false;
 }
+
 function checkIDNew(message) {
     var regexp = /(?:^|\s)New user in the room:\s(\d+)/g;
-    let newID = parseInt(regexp.exec(message)[1]);
-    if (newID) {
-        listUsers.push(['user', newID]);
-        return true;
+    let rg = regexp.exec(message);
+    if (rg) { 
+        let newID = rg[1];
+        if (!checkUserExist(newID)) {
+            listUsers.push(['user', newID]);
+            return true;
+         }
+    }
+    return false;
+}
+
+function checkUserExist(newUserID) {
+    for (let index = 0; index < listUsers.length; index++) {
+        let currentUser = listUsers[index];
+        console.log("testando " + newUserID + " -- type " + currentUser[0] + " ID " + currentUser[1]);
+
+        if (currentUser[1] == newUserID) { 
+            if (currentUser[0] == 'me') {
+                console.log("WWWWWWWWWWWOWWWWWWWW sou eu");
+            } else { 
+                console.log("já cadastrado");
+            }
+            return true;
+        }
     }
     return false;
 }
 
 function tableListUpdate(element, index, array) {
-    let newUser = $('<div>' + element[0] + element[1] + '</div>');
+
+
+    $t = '<div class="input-group"  style="border:solid 1px gray; margin-top:4px" ><div class="input-group-prepend"><div class="input-group-text"><input type = "checkbox"></div></div> <div style="align-self: center;text-align: center;padding-left:12px">' +
+        element[0] + " : " + element[1]
+        + '</div> </div>';
+
+                
+    let newUser = $($t);
+    // let newUser = $('<div> <input type="radio" name="favorite_pet" value="Cats" checked>'+'<li class="list-group-item">Cras justo odio</li></div>');
+    // let newUser = $('<div>' + element[0] + " : "+ element[1] + '</div>');
     $("#users").append(newUser);
 }
 
 function updateUserList() {
-    console.log("novo");
+    $("#users").empty();
+    
+    // <input type = "radio" name = "favorite_pet" value = "Cats" checked >
+    // <input type = "radio" name = "favorite_pet" value = "Dogs" > Dogs
+       
     listUsers.forEach(tableListUpdate);
 }
 
@@ -109,8 +146,6 @@ function log(type, msg) {
             newElement.css("background-color", "red");
             break;
     }
-
-
     $("#logs").append(newElement);
 }
 
