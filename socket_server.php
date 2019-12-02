@@ -95,7 +95,7 @@ function getMessage($source, $message){
 		$addr = $jMessage['addr'];
 		$text = $jMessage['text'];
 		switch($type){
-			case 'forall':
+			case 'all':
 				newMessage($source, 'all', $text);
 				break;
 			case 'echo':

@@ -3,6 +3,7 @@ var listUsers = [];
 var myID = 0;
 
 function init() {
+    listUsers.push(['todos', 'all']);
     var host = "ws://127.0.0.1:1227";
     try {
         socket = new WebSocket(host);
@@ -22,13 +23,13 @@ function init() {
                 if (source == 'server') {
                     !checkIDAttr(message);
                     !checkIDNew(message);
+                    updateUserList();
                 }
                 
                 log('message', source + " say: " + message);
                
             } catch (e) {
             }
-            updateUserList();
         };
         socket.onclose = function (msg) {
             log('status', "Disconnected - status " + this.readyState);
@@ -50,10 +51,11 @@ function send() {
     txt.value = "";
     txt.focus();
 
-    console.log($("select_user"));
+    var user = $("input[type='radio'][name='user']:checked").val();
+
     try {
         var msgObj  = {};
-        msgObj.type = "forall";
+        msgObj.type = user;
         msgObj.text = msg;
         msgObj.addr = "1234";
 
@@ -112,20 +114,16 @@ function checkUserExist(newUserID) {
 }
 
 function tableListUpdate(element, index, array) {
-
-
-    $t = '<div class="input-group" style="border:solid 1px gray; margin-top:4px" ><div class="input-group-prepend"><div class="input-group-text"><input type="radio" name="select_user"></div></div> <div style="align-self: center;text-align: center;padding-left:12px">' +
-        element[0] + " : " + element[1]
-        + '</div> </div>';
+    $t = '<div style="align-self:start;padding:4px;"><input type="radio" name="user" value=' + element[1] + '>' + element[0] + ' : ' + element[1] + '</input></div>'
                 
     let newUser = $($t);
-    // let newUser = $('<div> <input type="radio" name="favorite_pet" value="Cats" checked>'+'<li class="list-group-item">Cras justo odio</li></div>');
-    // let newUser = $('<div>' + element[0] + " : "+ element[1] + '</div>');
-    $("#users").append(newUser);
+    $("#userselect").append(newUser);
 }
 
 function updateUserList() {
-    $("#users").empty();
+    var user = $("input[type='radio'][name='user']:checked").val();
+    console.log('usuario atual: ' + user);
+    $("#userselect").empty();
     listUsers.forEach(tableListUpdate);
 }
 

@@ -52,9 +52,7 @@
                                         </div>
                                         <div class="col-4">
                                             <div class="dPanel" style="padding: 5px;" id="users">
-                                                <div class="card" style="width: 18rem;">
-                                                    <ul class="list-group list-group-flush">
-                                                    </ul>
+                                                <div id="userselect" class="card">
                                                 </div>
                                             </div>
                                         </div>
