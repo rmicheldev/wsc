@@ -89,25 +89,61 @@ socket_close($socket);
 function getMessage($source, $message){
 	$jMessage = json_decode($message, true);
 	if(!$jMessage){
-		newMessage('server', $source, "Error on get message");	
+		newMessage('server', '9990', "Error on get message");	
 	}else{
-		$type = $jMessage['type'];
-		$addr = $jMessage['addr'];
-		$text = $jMessage['text'];
-		switch($type){
-			case 'all':
-				newMessage($source, 'all', $text);
-				break;
-			case 'echo':
-				newMessage($source, $source, $text);
-				break;
-			case 'direct':
-				newMessage($source, $addr, $text);
-				break;
-		}
-		
+		$destination = $jMessage['destination'];
+		$message     = $jMessage['message'];
+		$source      = $jMessage['source'];
+
+		createLog($source, $destination, $message);
+
+		newMessage($source, $destination, $message);
 	}
 }
+
+
+function sendMessages(){
+	global $messageQueue;
+	global $clients;
+
+	foreach($messageQueue as $mItem => $messageQ){
+		$source      = $messageQ['source'];
+		$destination = $messageQ['destination'];
+		$message     = $messageQ['message'];
+		
+		foreach ($clients as $cItem => $clientItem) {
+			if($destination == '9999'){
+				socket_write($clientItem['socket'], encode(json_encode($messageQ)));
+			}else if ($destination == $clientItem['id']) {
+				socket_write($clientItem['socket'], encode(json_encode($messageQ)));
+			}
+		}
+		unset($messageQueue[$mItem]);
+	}
+
+}
+
+
+function newMessage($source, $destination, $message){
+	global $messageQueue;
+
+	$messageQ['source']      = $source;
+	$messageQ['destination'] = $destination;
+	$messageQ['message']     = $message;
+	$messageQueue[]          = $messageQ;
+}
+
+function createLog($type, $id, $message){
+	global $logs;
+	$log['type']   = $type;
+	$log['source'] = $id;
+	$log['message'] = $message;
+	$logs[] = $log;
+}
+
+
+
+
 
 
 function checkHandshake(&$clientItem){
@@ -125,11 +161,29 @@ function checkHandshake(&$clientItem){
 			if (doHandshake($clientItem, $string)) {
 				$clientItem["handshake"] = true;
 				$id = $clientItem['id'];
-				newMessage('server', $id, "Welcome, your current ID is: {$id}");
-				newMessage('server', 'all', "New user in the room: {$id}");
+
+				$control = [];
+				$control['type']  = 'set_user';
+				$control['id']    = $id;
+				newMessage('server', $id, json_encode($control));
+				sendUserList();
 			}
 		}
 	} 	
+}
+
+function sendUserList(){
+	global $clients;
+	$control = [];
+
+	$cList = [];
+
+	foreach ($clients as $cItem => $clientItem) {
+		$cList[] = $clientItem['id'];
+	}
+	$control['type']  = 'users_update';
+	$control['users'] = $cList;
+	newMessage('server', '9999', json_encode($control));
 }
 
 function doHandshake($client, $headers){
@@ -221,51 +275,7 @@ function screenUpdate(){
 		if ($log['type'] == 'server') {
 			printf("\n#%s :: %s", $log['source'], $log['message']);
 		} else {
-			printf("\n\t%s says :: %s", $log['source'], $log['message']);
+			printf("\n\t%s says :: %s to %s", $log['source'], $log['message'], $log['type']);
 		}
 	}
-}
-
-function sendMessages(){
-	global $messageQueue;
-	global $clients;
-
-	foreach($messageQueue as $mItem => $messageQ){
-		$source  = $messageQ['source'];
-		$dest    = $messageQ['dest'];
-		$message = $messageQ['message'];
-		
-		createLog($source, $dest, $message);
-
-		foreach ($clients as $cItem => $clientItem) {
-			if($dest == 'all'){
-				$msg['source']  = $source;
-				$msg['message'] = $message;
-				socket_write($clientItem['socket'], encode(json_encode($msg)));
-			}else if ($dest == $clientItem['id']) {
-				$msg['source']  = $source;
-				$msg['message'] = $message;
-				socket_write($clientItem['socket'], encode(json_encode($msg)));
-			}
-		}
-		unset($messageQueue[$mItem]);
-	}
-
-}
-
-function newMessage($source, $dest, $message){
-	global $messageQueue;
-
-	$messageQ['source']  = $source;
-	$messageQ['dest']    = $dest;
-	$messageQ['message'] = $message;
-	$messageQueue[] = $messageQ;
-}
-
-function createLog($type, $id, $message){
-	global $logs ;
-	$log['type']   = $type;
-	$log['source'] = $id;
-	$log['message'] = $message;
-	$logs[] = $log;	
 }

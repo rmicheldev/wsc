@@ -1,9 +1,9 @@
 var socket;
-var listUsers = [];
-var myID = 0;
+var listUsers   = [];
+var myCurrentId = 0;
 
 function init() {
-    listUsers.push(['todos', 'all']);
+    listUsers.push(['todos', '9999']);
     var host = "ws://127.0.0.1:1227";
     try {
         socket = new WebSocket(host);
@@ -16,18 +16,25 @@ function init() {
             try {
                 let jMessage = JSON.parse(msg.data);
                 let message  = jMessage['message'];
-                let source   = jMessage['source'];
-                
-                console.log(msg.data);
+                let source = jMessage['source'];
 
                 if (source == 'server') {
-                    !checkIDAttr(message);
-                    !checkIDNew(message);
+                    let commando = JSON.parse(message);
+
+                    switch (commando['type']) { 
+                        case 'users_update':
+                            listUsers = [];
+                            console.log(commando['users']);
+                            commando['users'].forEach(adduser);
+                            break;
+                        case 'set_user':
+                            myCurrentId = commando['id'];
+                            $("#myid").text("[identificador: " + myCurrentId + "]");
+                            break;
+                    }
                     updateUserList();
                 }
-                
                 log('message', source + " say: " + message);
-               
             } catch (e) {
             }
         };
@@ -37,85 +44,44 @@ function init() {
     } catch (ex) {
         log('status', ex);
     }
-    $("#msg").focus();
+}
+
+function adduser(item, index) {
+    listUsers.push(['user ' + item, item]);
 }
 
 function send() {
-    var txt, msg;
-    txt = $("#inputmessage")[0];
-    msg = txt.value;
-    if (!msg) {
+    //carrega a mensagem
+    var inputmessage, message;
+    inputmessage = $("#inputmessage")[0];
+    message = inputmessage.value;
+    if (!message) {
         alert("Message can not be empty");
         return;
     }
-    txt.value = "";
-    txt.focus();
+    //limpa o campo
+    inputmessage.value = "";
+    inputmessage.focus();
 
+    //seleciona o destino
     var user = $("input[type='radio'][name='user']:checked").val();
 
+    //monta o objeto para enviar ao servidor
     try {
-        var msgObj  = {};
-        msgObj.type = user;
-        msgObj.text = msg;
-        msgObj.addr = "1234";
+        var msgObj = {};
+        msgObj.destination = user;
+        msgObj.message     = message;
+        msgObj.source      = myCurrentId;
 
-        jsmsg = JSON.stringify(msgObj);
-        log('self', msg);
-   
-        
+        jsmsg = JSON.stringify(msgObj);        
         socket.send(jsmsg);
     } catch (ex) {
         log('status', ex);
     }
 }
 
-function checkIDAttr(message) {
-    var regexp = /(?:^|\s)Welcome, your current ID is:\s(\d+)/g;
-    let rg = regexp.exec(message);
-    if (rg) {
-        let myID = rg[1];
-         if (!checkUserExist(myID)) {
-            $("#myid").text("[identificador: " + myID + "]");
-            listUsers.push(['me', parseInt(myID)]);
-            return true;
-        }
-    }
-    return false;
-}
-
-function checkIDNew(message) {
-    var regexp = /(?:^|\s)New user in the room:\s(\d+)/g;
-    let rg = regexp.exec(message);
-    if (rg) { 
-        let newID = rg[1];
-        if (!checkUserExist(newID)) {
-            listUsers.push(['user', newID]);
-            return true;
-         }
-    }
-    return false;
-}
-
-function checkUserExist(newUserID) {
-    for (let index = 0; index < listUsers.length; index++) {
-        let currentUser = listUsers[index];
-        console.log("testando " + newUserID + " -- type " + currentUser[0] + " ID " + currentUser[1]);
-
-        if (currentUser[1] == newUserID) { 
-            if (currentUser[0] == 'me') {
-                console.log("WWWWWWWWWWWOWWWWWWWW sou eu");
-            } else { 
-                console.log("já cadastrado");
-            }
-            return true;
-        }
-    }
-    return false;
-}
-
 function tableListUpdate(element, index, array) {
-    $t = '<div style="align-self:start;padding:4px;"><input type="radio" name="user" value=' + element[1] + '>' + element[0] + ' : ' + element[1] + '</input></div>'
-                
+    $t = '<div style="align-self:start;padding:4px;"><input type="radio" name="user" value=' + element[1] + '>' + element[0] + '    [' + element[1] + ']</input></div>'
     let newUser = $($t);
     $("#userselect").append(newUser);
 }
