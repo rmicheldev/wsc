@@ -8,7 +8,6 @@ $address      = "127.0.0.1";
 $port         = "1227";
 $clients      = [];
 $logs         = [];
-$logs         = [];
 $messageQueue = [];
 $ping         = false;
 
@@ -57,6 +56,7 @@ do {
 			checkHandshake($clientItem);
 
 			if ($clientItem["handshake"] == true) {
+				
 
 				$bytes = @socket_recv($clientItem['socket'], $data, 2048, MSG_DONTWAIT);
 				if ($data != "") {
@@ -69,7 +69,8 @@ do {
 
 		if ($ping) {
 			$ping = false;
-			newMessage('server', 'all', 'ping');
+			$control['type']  = 'ping';
+			newMessage('server', '9999', json_encode($control));
 		}
 		sendMessages();
 	}
@@ -79,7 +80,7 @@ do {
 	$diffTime    = $currentTime - $refTime;
 	if ($diffTime >= 10) {
 		   $refTime = $currentTime;
-		//    $ping    = true;
+		   $ping    = true;
 	}
 
 } while (true);
@@ -89,7 +90,7 @@ socket_close($socket);
 function getMessage($source, $message){
 	$jMessage = json_decode($message, true);
 	if(!$jMessage){
-		newMessage('server', '9990', "Error on get message");	
+		newMessage('server', '9999', "Error on get message");	
 	}else{
 		$destination = $jMessage['destination'];
 		$message     = $jMessage['message'];
@@ -111,11 +112,21 @@ function sendMessages(){
 		$destination = $messageQ['destination'];
 		$message     = $messageQ['message'];
 		
-		foreach ($clients as $cItem => $clientItem) {
-			if($destination == '9999'){
-				socket_write($clientItem['socket'], encode(json_encode($messageQ)));
-			}else if ($destination == $clientItem['id']) {
-				socket_write($clientItem['socket'], encode(json_encode($messageQ)));
+		foreach ($clients as $key => $clientItem) {
+			try{
+				if($destination == '9999'){
+					if(!socket_write($clientItem['socket'], encode(json_encode($messageQ)))){
+						createLog('server', $destination, 'Removendo cliente '.$clientItem['id']);
+						unset($clients[$key]);
+						sendUserList();
+					}
+				}else if ($destination == $clientItem['id']) {
+					if(!socket_write($clientItem['socket'], encode(json_encode($messageQ)))){
+						createLog('server', $destination, 'Removendo cliente ' . $clientItem['id']);
+					}
+				}
+			}catch(Exception $e){
+				createLog('server', $destination, 'Removendo cliente ' . $clientItem['id']);
 			}
 		}
 		unset($messageQueue[$mItem]);
@@ -159,9 +170,9 @@ function checkHandshake(&$clientItem){
 			
 			// printf("\nHandshaking headers from client: %s", $string);
 			if (doHandshake($clientItem, $string)) {
+				createLog('server', $clientItem['id'], "Handshake: sucess");
 				$clientItem["handshake"] = true;
 				$id = $clientItem['id'];
-
 				$control = [];
 				$control['type']  = 'set_user';
 				$control['id']    = $id;

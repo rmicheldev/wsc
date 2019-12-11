@@ -1,11 +1,12 @@
 var socket;
 var listUsers   = [];
 var myCurrentId = 0;
+var radioSelect = '9999';
 
 function init() {
-    listUsers.push(['todos', '9999']);
     var host = "ws://127.0.0.1:1227";
     try {
+       
         socket = new WebSocket(host);
         log('status', 'WS status ' + socket.readyState);
 
@@ -21,9 +22,10 @@ function init() {
                 if (source == 'server') {
                     let commando = JSON.parse(message);
 
-                    switch (commando['type']) { 
+                    switch (commando['type']) {
                         case 'users_update':
                             listUsers = [];
+                            listUsers.push(['todos', '9999']);
                             console.log(commando['users']);
                             commando['users'].forEach(adduser);
                             break;
@@ -31,10 +33,21 @@ function init() {
                             myCurrentId = commando['id'];
                             $("#myid").text("[identificador: " + myCurrentId + "]");
                             break;
+                        case 'ping':
+                            console.log("PING");
+                            var msgObj = {};
+                            msgObj.destination = 'server';
+                            msgObj.message = 'pong';
+                            msgObj.source = myCurrentId;
+                            jsmsg = JSON.stringify(msgObj);
+                            socket.send(jsmsg);
+                            break;
                     }
                     updateUserList();
+                } else { 
+                    log('message', '[origem: '+ source + "] <= " + message);
                 }
-                log('message', source + " say: " + message);
+                
             } catch (e) {
             }
         };
@@ -50,21 +63,25 @@ function adduser(item, index) {
     listUsers.push(['user ' + item, item]);
 }
 
-function send() {
+function sendMessage() {
     //carrega a mensagem
     var inputmessage, message;
     inputmessage = $("#inputmessage")[0];
     message = inputmessage.value;
+    inputmessage.focus();
     if (!message) {
-        alert("Message can not be empty");
+        alert("A mensagem não deve estar vazia");
         return;
     }
     //limpa o campo
     inputmessage.value = "";
-    inputmessage.focus();
 
     //seleciona o destino
     var user = $("input[type='radio'][name='user']:checked").val();
+     if (!user) {
+         alert("Selecione o destino");
+         return;
+     }
 
     //monta o objeto para enviar ao servidor
     try {
@@ -75,22 +92,25 @@ function send() {
 
         jsmsg = JSON.stringify(msgObj);        
         socket.send(jsmsg);
+        log('self','[destino: ' + user + '] => ' + message);
     } catch (ex) {
         log('status', ex);
     }
 }
 
-function tableListUpdate(element, index, array) {
+function tableListUpdate(element) {
     $t = '<div style="align-self:start;padding:4px;"><input type="radio" name="user" value=' + element[1] + '>' + element[0] + '    [' + element[1] + ']</input></div>'
     let newUser = $($t);
     $("#userselect").append(newUser);
 }
 
 function updateUserList() {
-    var user = $("input[type='radio'][name='user']:checked").val();
-    console.log('usuario atual: ' + user);
     $("#userselect").empty();
     listUsers.forEach(tableListUpdate);
+
+    $("input[type='radio'][name='user'][value='"+radioSelect +"']").prop('checked', true);
+    listenRadio();
+
 }
 
 
@@ -98,13 +118,13 @@ function log(type, msg) {
      let newElement = $('<div>' + msg + '</div>');
     switch (type) { 
         case 'message':
-            newElement.css("background-color", "yellow");
+            newElement.addClass('message')
             break;
         case 'self':
-            newElement.css("background-color", "green");
+            newElement.addClass('logmessage');
             break;
         case 'status':
-            newElement.css("background-color", "red");
+            newElement.addClass('systemmessage');
             break;
     }
     $("#logs").append(newElement);
@@ -112,6 +132,12 @@ function log(type, msg) {
 
 function onkey(event) {
     if (event.keyCode == 13) {
-        send();
+        sendMessage();
     }
+}
+
+function listenRadio() { 
+    $('input[type=radio][name=user]').change(function () {
+        radioSelect = this.value;
+    });
 }

@@ -27,18 +27,30 @@
         #msg {
             width: 100%;
         }
+
+        .systemmessage {
+            border: solid 1px #969494;
+            background-color: #d6d2d2;
+        }
+
+        .message {
+            border: solid 1px #969494;
+            background-color: #6cc24c;
+        }
+
+        .logmessage {
+            border: solid 1px #969494;
+            background-color: #a3bdbf;
+        }
     </style>
     <script src="wsc.js"></script>
-
 </head>
 
 <body onload="init()" class="text-center">
-
-    <!-- <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column" style="background:#941894"> -->
     <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
         <div class="container">
             <div class="row">
-                <div class="offset-2 col-8">
+                <div class="col-12 offset-xl-2 col-xl-8">
                     <main role="main" class="inner cover">
                         <div class="card">
                             <div class="card-header">
@@ -63,7 +75,7 @@
                                         <div class="input-group mb-3">
                                             <input id="inputmessage" type="textbox" onkeypress="onkey(event)" class="form-control" placeholder="mensagem">
                                             <div class="input-group-append">
-                                                <button class="btn btn-primary" type="button" id="button-addon2" onclick="send()">Enviar</button>
+                                                <button class="btn btn-primary" type="button" id="button-addon2" onclick="sendMessage()">Enviar</button>
                                             </div>
                                         </div>
                                     </div>
