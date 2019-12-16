@@ -25,7 +25,7 @@ function init() {
                     switch (commando['type']) {
                         case 'users_update':
                             listUsers = [];
-                            listUsers.push(['todos', '9999']);
+                            listUsers.push(['all', '9999']);
                             console.log(commando['users']);
                             commando['users'].forEach(adduser);
                             break;
@@ -60,7 +60,11 @@ function init() {
 }
 
 function adduser(item, index) {
-    listUsers.push(['user ' + item, item]);
+    if (item == myCurrentId) {
+        listUsers.push(['me ' + item, item]);
+    } else { 
+        listUsers.push(['user ' + item, item]);
+    }
 }
 
 function sendMessage() {

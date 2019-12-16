@@ -17,6 +17,7 @@
             height: 200px;
             /* overflow: auto; */
             border: 1px solid black;
+            overflow-y: scroll;
         }
 
         .row {
@@ -41,6 +42,7 @@
         .logmessage {
             border: solid 1px #969494;
             background-color: #a3bdbf;
+            overflow-y: scroll;
         }
     </style>
     <script src="wsc.js"></script>

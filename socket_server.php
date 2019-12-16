@@ -75,10 +75,10 @@ do {
 		sendMessages();
 	}
 
-	usleep(1000000);
+	usleep(1000);
 	$currentTime = round(microtime(true));
 	$diffTime    = $currentTime - $refTime;
-	if ($diffTime >= 10) {
+	if ($diffTime >= 100) {
 		   $refTime = $currentTime;
 		   $ping    = true;
 	}
@@ -90,7 +90,7 @@ socket_close($socket);
 function getMessage($source, $message){
 	$jMessage = json_decode($message, true);
 	if(!$jMessage){
-		newMessage('server', '9999', "Error on get message");	
+		newMessage('server', '9999', "Error on get message ");	
 	}else{
 		$destination = $jMessage['destination'];
 		$message     = $jMessage['message'];
@@ -267,7 +267,6 @@ function encode($text){
 }
 
 function screenUpdate(){
-
 	global $address;
 	global $port;
 	global $clients;
