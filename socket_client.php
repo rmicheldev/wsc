@@ -4,51 +4,15 @@
     <title>WebSocket</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="public.css">
+    
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <style>
-        html,
-        body {
-            font: normal 0.9em arial, helvetica;
-        }
-
-        .dPanel {
-            width: 100%;
-            height: 200px;
-            /* overflow: auto; */
-            border: 1px solid black;
-            overflow-y: scroll;
-        }
-
-        .row {
-            padding-top: 12px;
-            padding-bottom: 12px;
-        }
-
-        #msg {
-            width: 100%;
-        }
-
-        .systemmessage {
-            border: solid 1px #969494;
-            background-color: #d6d2d2;
-        }
-
-        .message {
-            border: solid 1px #969494;
-            background-color: #6cc24c;
-        }
-
-        .logmessage {
-            border: solid 1px #969494;
-            background-color: #a3bdbf;
-            overflow-y: scroll;
-        }
-    </style>
+    <link rel="stylesheet" href="main.css">
+   
     <script src="wsc.js"></script>
 </head>
 
-<body onload="init()" class="text-center">
+<body onload="init('192.168.53.21')" class="text-center">
+
     <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
         <div class="container">
             <div class="row">

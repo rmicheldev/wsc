@@ -4,7 +4,11 @@ error_reporting(E_ALL);
 set_time_limit(0);
 ob_implicit_flush();
 
-$address      = "127.0.0.1";
+//The server IP here
+$ip_server = "127.0.0.1";
+
+// Printing the stored addres
+$address      = $ip_server;
 $port         = "1227";
 $clients      = [];
 $logs         = [];
@@ -45,7 +49,7 @@ do {
 			$newClient['handshake'] = false;
 			$clients[] = $newClient;
 
-			createLog('server', $newClient['id'], "New client");
+			createLog('server', $newClient['id'], "new client");
 		}
 	}
 
@@ -116,22 +120,21 @@ function sendMessages(){
 			try{
 				if($destination == '9999'){
 					if(!socket_write($clientItem['socket'], encode(json_encode($messageQ)))){
-						createLog('server', $destination, 'Removendo cliente '.$clientItem['id']);
+						createLog('server', $destination, 'removing client '.$clientItem['id']);
 						unset($clients[$key]);
 						sendUserList();
 					}
 				}else if ($destination == $clientItem['id']) {
 					if(!socket_write($clientItem['socket'], encode(json_encode($messageQ)))){
-						createLog('server', $destination, 'Removendo cliente ' . $clientItem['id']);
+						createLog('server', $destination, 'removing client ' . $clientItem['id']);
 					}
 				}
 			}catch(Exception $e){
-				createLog('server', $destination, 'Removendo cliente ' . $clientItem['id']);
+				createLog('server', $destination, 'removing client ' . $clientItem['id']);
 			}
 		}
 		unset($messageQueue[$mItem]);
 	}
-
 }
 
 
@@ -151,10 +154,6 @@ function createLog($type, $id, $message){
 	$log['message'] = $message;
 	$logs[] = $log;
 }
-
-
-
-
 
 
 function checkHandshake(&$clientItem){

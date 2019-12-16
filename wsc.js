@@ -3,8 +3,9 @@ var listUsers   = [];
 var myCurrentId = 0;
 var radioSelect = '9999';
 
-function init() {
-    var host = "ws://127.0.0.1:1227";
+function init(server) {
+    console.log('server '+server);
+    var host = "ws://"+server+":1227";
     try {
        
         socket = new WebSocket(host);
@@ -31,7 +32,7 @@ function init() {
                             break;
                         case 'set_user':
                             myCurrentId = commando['id'];
-                            $("#myid").text("[identificador: " + myCurrentId + "]");
+                            $("#myid").text("[identifier: " + myCurrentId + "]");
                             break;
                         case 'ping':
                             console.log("PING");
@@ -45,7 +46,7 @@ function init() {
                     }
                     updateUserList();
                 } else { 
-                    log('message', '[origem: '+ source + "] <= " + message);
+                    log('message', '[source: '+ source + "] <= " + message);
                 }
                 
             } catch (e) {
@@ -74,7 +75,7 @@ function sendMessage() {
     message = inputmessage.value;
     inputmessage.focus();
     if (!message) {
-        alert("A mensagem não deve estar vazia");
+        alert("the message can't be empty");
         return;
     }
     //limpa o campo
@@ -83,7 +84,7 @@ function sendMessage() {
     //seleciona o destino
     var user = $("input[type='radio'][name='user']:checked").val();
      if (!user) {
-         alert("Selecione o destino");
+         alert("select destination");
          return;
      }
 
