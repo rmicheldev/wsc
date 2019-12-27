@@ -1,2 +1,3 @@
 # wsc
-A simple chat with WebSocket
+
+A WebSocket chat
